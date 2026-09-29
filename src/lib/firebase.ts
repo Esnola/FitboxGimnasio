@@ -54,7 +54,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   return errInfo;
 }
 
-// Test initial connection as required by Firebase skill
+// Test initial connection
 async function testConnection() {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));

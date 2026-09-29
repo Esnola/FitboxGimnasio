@@ -13,7 +13,7 @@ service cloud.firestore {
     // Members collection
     match /members/{memberId} {
       allow read: if true;
-      allow create, update: if isSignedIn() || request.auth == null; // Allows seed/demo initiation & member profile edits
+      allow create, update: if isSignedIn() || request.auth == null;
       allow delete: if isSignedIn() && request.auth.uid == memberId;
     }
 
@@ -21,7 +21,7 @@ service cloud.firestore {
     match /classes/{classId} {
       allow read: if true;
       allow create, delete: if true;
-      allow update: if true; // Allows updating bookedCount and waitlistCount upon reserving
+      allow update: if true;
     }
 
     // Bookings collection

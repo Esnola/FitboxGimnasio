@@ -43,7 +43,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       <div className="bg-[#1e2024] border border-[#c3f400]/40 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-5 text-left relative neon-glow">
         <button
           onClick={onClose}
-          className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-[#333539] text-[#e2e2e8] flex items-center justify-center hover:bg-[#c3f400] hover:text-[#111317] transition-colors"
+          className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-[#333539] text-[#e2e2e8] flex items-center justify-center hover:bg-[#c3f400] hover:text-[#111317] transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined text-[20px]">close</span>
         </button>
@@ -87,7 +87,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <button
               onClick={handleSignOut}
               disabled={isProcessing}
-              className="w-full py-2.5 rounded-lg border border-[#fb5b1b] text-[#fb5b1b] hover:bg-[#fb5b1b]/10 font-condensed font-bold text-[15px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-lg border border-[#fb5b1b] text-[#fb5b1b] hover:bg-[#fb5b1b]/10 font-condensed font-bold text-[15px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">logout</span>
               <span>{isProcessing ? 'Cerrando sesión...' : 'Cerrar Sesión'}</span>
@@ -98,7 +98,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <button
               onClick={handleGoogleSignIn}
               disabled={isProcessing}
-              className="w-full py-3 px-4 rounded-xl bg-white text-black font-inter font-semibold text-sm hover:bg-neutral-200 active:scale-98 transition-all flex items-center justify-center gap-3 shadow-md"
+              className="w-full py-3 px-4 rounded-xl bg-white text-black font-inter font-semibold text-sm hover:bg-neutral-200 active:scale-98 transition-all flex items-center justify-center gap-3 shadow-md cursor-pointer"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -133,7 +133,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 loadDemoUser();
                 onClose();
               }}
-              className="w-full py-2.5 rounded-lg bg-[#c3f400] text-[#111317] font-condensed font-bold text-[15px] uppercase tracking-wider hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-lg bg-[#c3f400] text-[#111317] font-condensed font-bold text-[15px] uppercase tracking-wider hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">account_circle</span>
               <span>Continuar como Alex Mendoza (Socio #FB-8942)</span>

@@ -121,7 +121,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           handleFirestoreError(err, OperationType.WRITE, `members/${user.uid}`);
         }
       } else {
-        // Fallback to active demo member so the app is 100% interactive without login hurdles
+        // Fallback to active demo member
         setCurrentMember(INITIAL_MEMBER);
       }
     });
@@ -159,7 +159,6 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!snap.empty) {
           const loadedClasses: GymClass[] = [];
           snap.forEach((d) => loadedClasses.push(d.data() as GymClass));
-          // Sort by startTime
           loadedClasses.sort((a, b) => a.startTime.localeCompare(b.startTime));
           setClasses(loadedClasses);
         }
@@ -186,7 +185,6 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setBookings(loaded);
       },
       (error) => {
-        // Also listen without where filter if rule requires
         const unsubAll = onSnapshot(
           collection(db, 'bookings'),
           (allSnap) => {
@@ -271,7 +269,6 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const reserveClass = async (gymClass: GymClass): Promise<{ success: boolean; message: string }> => {
     const memberUid = currentMember.uid;
 
-    // Check if already booked
     const existing = bookings.find(
       (b) => b.classId === gymClass.id && b.status === 'confirmed'
     );
@@ -305,7 +302,6 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bookedCount: increment(1),
       });
 
-      // Update local state immediately for instant feedback
       setBookings((prev) => [...prev, { ...bookingData, id: docRef.id }]);
       setClasses((prev) =>
         prev.map((c) => (c.id === gymClass.id ? { ...c, bookedCount: c.bookedCount + 1 } : c))
@@ -326,16 +322,13 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     try {
-      // Delete or update booking
       await deleteDoc(doc(db, 'bookings', targetBooking.id));
 
-      // Decrement bookedCount in class
       const classRef = doc(db, 'classes', classId);
       await updateDoc(classRef, {
         bookedCount: increment(-1),
       });
 
-      // Update local state
       setBookings((prev) => prev.filter((b) => b.id !== targetBooking.id));
       setClasses((prev) =>
         prev.map((c) =>
@@ -375,7 +368,6 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const docRef = await addDoc(collection(db, 'bookings'), bookingData);
 
-      // Increment waitlist count in class
       const classRef = doc(db, 'classes', gymClass.id);
       await updateDoc(classRef, {
         waitlistCount: increment(1),
@@ -432,7 +424,6 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await updateDoc(memberRef, updates);
       setCurrentMember((prev) => ({ ...prev, ...updates }));
 
-      // Also create a new receipt in history
       const price = billingCycle === 'annual' ? newPlan.priceAnnualMonthly : newPlan.priceMonthly;
       const newRec: Receipt = {
         id: `rec-${Date.now()}`,
@@ -512,7 +503,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Switch to demo user
+  // Load Demo User
   const loadDemoUser = () => {
     setCurrentMember(INITIAL_MEMBER);
   };
