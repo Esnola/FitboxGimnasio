@@ -1,0 +1,6 @@
+{
+  "name": "FitBox Club - App de Socios y Reservas",
+  "description": "App deportiva para socios de FitBox: reserva de clases de CrossFit, gestión de cuotas, marcas personales WOD & PRs y carnet digital con Firebase Firestore.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

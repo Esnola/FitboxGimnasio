@@ -1,0 +1,149 @@
+{
+  "entities": {
+    "Member": {
+      "title": "Member",
+      "description": "Athlete/member profile of the gym",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 150 },
+        "memberId": { "type": "string", "maxLength": 30 },
+        "avatarUrl": { "type": "string", "maxLength": 1000 },
+        "level": { "type": "string", "enum": ["RX", "SCALED", "PRO"] },
+        "planId": { "type": "string" },
+        "planName": { "type": "string", "maxLength": 100 },
+        "planExpiry": { "type": "string" },
+        "planStatus": { "type": "string", "enum": ["active", "paused", "expired"] },
+        "paymentMethod": { "type": "string", "maxLength": 50 },
+        "weightKg": { "type": "number" },
+        "heightCm": { "type": "number" },
+        "bodyFatPercent": { "type": "number" },
+        "emergencyContact": { "type": "string", "maxLength": 150 },
+        "medicalCertificateValidUntil": { "type": "string" },
+        "monthlyAttendances": { "type": "number" },
+        "streakDays": { "type": "number" },
+        "classReminders": { "type": "boolean" },
+        "healthSync": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "name", "email", "memberId"]
+    },
+    "GymClass": {
+      "title": "GymClass",
+      "description": "Scheduled group fitness class in the box",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "enum": ["crossfit", "halterofilia", "endurance", "openbox", "mobility"] },
+        "location": { "type": "string", "maxLength": 100 },
+        "coachName": { "type": "string", "maxLength": 100 },
+        "coachInitials": { "type": "string", "maxLength": 5 },
+        "startTime": { "type": "string", "maxLength": 10 },
+        "endTime": { "type": "string", "maxLength": 10 },
+        "durationMinutes": { "type": "number" },
+        "date": { "type": "string", "maxLength": 15 },
+        "dayOfWeek": { "type": "string", "maxLength": 10 },
+        "intensity": { "type": "string", "maxLength": 50 },
+        "sublabel": { "type": "string", "maxLength": 100 },
+        "maxCapacity": { "type": "number" },
+        "bookedCount": { "type": "number" },
+        "waitlistCount": { "type": "number" }
+      },
+      "required": ["id", "title", "category", "startTime", "endTime", "maxCapacity"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Reservation made by a member for a class",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "classId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string", "maxLength": 100 },
+        "classTitle": { "type": "string", "maxLength": 100 },
+        "classTime": { "type": "string", "maxLength": 30 },
+        "classDate": { "type": "string", "maxLength": 20 },
+        "boxPassCode": { "type": "string", "maxLength": 30 },
+        "status": { "type": "string", "enum": ["confirmed", "waitlist", "cancelled"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "classId", "memberId", "status"]
+    },
+    "Plan": {
+      "title": "Plan",
+      "description": "Gym membership subscription tier",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "tag": { "type": "string", "maxLength": 50 },
+        "priceMonthly": { "type": "number" },
+        "priceAnnualMonthly": { "type": "number" },
+        "description": { "type": "string", "maxLength": 250 },
+        "features": { "type": "string" },
+        "isPopular": { "type": "boolean" },
+        "highlight": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["id", "name", "priceMonthly"]
+    },
+    "PrRecord": {
+      "title": "PrRecord",
+      "description": "Personal record benchmark logged by a member",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "memberId": { "type": "string" },
+        "exercise": { "type": "string", "maxLength": 100 },
+        "weightKg": { "type": "number" },
+        "reps": { "type": "number" },
+        "date": { "type": "string", "maxLength": 30 },
+        "notes": { "type": "string", "maxLength": 250 }
+      },
+      "required": ["id", "memberId", "exercise", "weightKg"]
+    },
+    "Receipt": {
+      "title": "Receipt",
+      "description": "Payment receipt invoice for membership",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "memberId": { "type": "string" },
+        "title": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "date": { "type": "string", "maxLength": 50 },
+        "paymentMethod": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["paid", "pending"] }
+      },
+      "required": ["id", "memberId", "title", "amount", "date"]
+    }
+  },
+  "firestore": {
+    "/members/{memberId}": {
+      "schema": "Member",
+      "description": "Athletes and members personal profile data"
+    },
+    "/classes/{classId}": {
+      "schema": "GymClass",
+      "description": "Fitness classes scheduled at the gym"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Reservations made by athletes"
+    },
+    "/plans/{planId}": {
+      "schema": "Plan",
+      "description": "Gym membership plans"
+    },
+    "/prs/{prId}": {
+      "schema": "PrRecord",
+      "description": "Personal record benchmarks"
+    },
+    "/receipts/{receiptId}": {
+      "schema": "Receipt",
+      "description": "Invoices and subscription payment history"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Members collection
+    match /members/{memberId} {
+      allow read: if true;
+      allow create, update: if isSignedIn() || request.auth == null; // Allows seed/demo initiation & member profile edits
+      allow delete: if isSignedIn() && request.auth.uid == memberId;
+    }
+
+    // Classes collection
+    match /classes/{classId} {
+      allow read: if true;
+      allow create, delete: if true;
+      allow update: if true; // Allows updating bookedCount and waitlistCount upon reserving
+    }
+
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Plans collection
+    match /plans/{planId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // PRs (Personal Records)
+    match /prs/{prId} {
+      allow read, write: if true;
+    }
+
+    // Receipts
+    match /receipts/{receiptId} {
+      allow read, write: if true;
+    }
+
+    // Default catch-all
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
