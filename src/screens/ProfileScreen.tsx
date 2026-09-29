@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGym } from '../context/GymContext';
 import { QrPassModal } from '../components/modals/QrPassModal';
 import { EditProfileModal } from '../components/modals/EditProfileModal';
+import { LaravelExportModal } from '../components/modals/LaravelExportModal';
 
 interface ProfileScreenProps {
   onOpenAuth: () => void;
@@ -20,6 +21,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenAuth }) => {
   } = useGym();
   const [showQrModal, setShowQrModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showLaravelModal, setShowLaravelModal] = useState(false);
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const [bookingTab, setBookingTab] = useState<'futuras' | 'pasadas'>('futuras');
   const [selectedBookingForQr, setSelectedBookingForQr] = useState<{
@@ -233,6 +235,27 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenAuth }) => {
             <span>{toastMsg}</span>
           </div>
         )}
+
+        {/* BANNER PROYECTO LARAVEL 13 & FILAMENT 5 */}
+        <div className="bg-gradient-to-r from-[#1e2024] to-[#141619] border border-[#c3f400]/60 rounded-xl p-3 shadow-lg flex items-center justify-between">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#c3f400]/20 text-[#c3f400] flex items-center justify-center">
+              <span className="material-symbols-outlined text-[20px]">code_blocks</span>
+            </div>
+            <div>
+              <span className="font-condensed text-[14px] uppercase font-bold text-white block">
+                LARAVEL 13 + BLADE & FILAMENT 5
+              </span>
+              <p className="text-[11px] text-[#c4c9ac] font-inter">Código completo generado en /laravel-app/</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowLaravelModal(true)}
+            className="px-2.5 py-1.5 rounded-lg bg-[#c3f400] text-[#111317] font-condensed font-extrabold uppercase text-[12px] tracking-wider hover:brightness-110 active:scale-95 transition-all cursor-pointer shadow-sm"
+          >
+            Ver Código
+          </button>
+        </div>
 
         {/* SECCIÓN MIS RESERVAS (FUTURAS Y PASADAS) */}
         <section className="bg-[#1e2024] border border-[#444933]/30 rounded-xl p-4 shadow-lg space-y-3">
@@ -858,6 +881,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenAuth }) => {
       {/* Edit Profile Modal */}
       {showEditModal && (
         <EditProfileModal isOpen={showEditModal} onClose={() => setShowEditModal(false)} />
+      )}
+
+      {/* Laravel Export Modal */}
+      {showLaravelModal && (
+        <LaravelExportModal isOpen={showLaravelModal} onClose={() => setShowLaravelModal(false)} />
       )}
     </div>
   );
