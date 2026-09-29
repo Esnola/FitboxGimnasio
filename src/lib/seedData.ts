@@ -305,7 +305,55 @@ export const INITIAL_BOOKINGS: Booking[] = [
     classDate: '2024-10-25',
     boxPassCode: '#4920',
     status: 'confirmed',
-    createdAt: new Date().toISOString(),
+    createdAt: '2024-10-24T18:00:00.000Z',
+  },
+  {
+    id: 'booking-alex-26-1945',
+    classId: 'class-26-1945',
+    memberId: 'alex-mendoza-demo',
+    memberName: 'Alex Mendoza',
+    classTitle: 'HALTEROFILIA / OLY',
+    classTime: '19:45 - 20:45',
+    classDate: '2024-10-26',
+    boxPassCode: '#5184',
+    status: 'confirmed',
+    createdAt: '2024-10-24T19:00:00.000Z',
+  },
+  {
+    id: 'booking-alex-24-0700',
+    classId: 'class-24-0700',
+    memberId: 'alex-mendoza-demo',
+    memberName: 'Alex Mendoza',
+    classTitle: 'CROSSFIT WOD',
+    classTime: '07:00 - 08:00',
+    classDate: '2024-10-24',
+    boxPassCode: '#3890',
+    status: 'confirmed',
+    createdAt: '2024-10-23T10:00:00.000Z',
+  },
+  {
+    id: 'booking-alex-22-1000',
+    classId: 'class-22-1000',
+    memberId: 'alex-mendoza-demo',
+    memberName: 'Alex Mendoza',
+    classTitle: 'FUNCIONAL & HIIT',
+    classTime: '10:00 - 11:00',
+    classDate: '2024-10-22',
+    boxPassCode: '#2910',
+    status: 'confirmed',
+    createdAt: '2024-10-21T09:30:00.000Z',
+  },
+  {
+    id: 'booking-alex-20-1400',
+    classId: 'class-20-1400',
+    memberId: 'alex-mendoza-demo',
+    memberName: 'Alex Mendoza',
+    classTitle: 'OPEN BOX LIBRE',
+    classTime: '14:00 - 15:30',
+    classDate: '2024-10-20',
+    boxPassCode: '#1182',
+    status: 'confirmed',
+    createdAt: '2024-10-19T14:10:00.000Z',
   },
 ];
 
@@ -336,11 +384,11 @@ export async function seedInitialDatabaseIfEmpty() {
     }
 
     const bookingsSnap = await getDocs(collection(db, 'bookings'));
-    if (bookingsSnap.empty) {
+    if (bookingsSnap.empty || bookingsSnap.size < INITIAL_BOOKINGS.length) {
       console.log('Seeding initial bookings...');
       const batch = writeBatch(db);
       INITIAL_BOOKINGS.forEach(b => {
-        batch.set(doc(db, 'bookings', b.id), b);
+        batch.set(doc(db, 'bookings', b.id), b, { merge: true });
       });
       await batch.commit();
     }

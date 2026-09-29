@@ -8,10 +8,52 @@ interface ProfileScreenProps {
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenAuth }) => {
-  const { currentMember, updateMemberProfile, signOutUser, authUser } = useGym();
+  const {
+    currentMember,
+    updateMemberProfile,
+    signOutUser,
+    authUser,
+    bookings,
+    classes,
+    cancelReservation,
+    setActiveTab,
+  } = useGym();
   const [showQrModal, setShowQrModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+  const [bookingTab, setBookingTab] = useState<'futuras' | 'pasadas'>('futuras');
+  const [selectedBookingForQr, setSelectedBookingForQr] = useState<{
+    classTitle: string;
+    classTime: string;
+    location?: string;
+    coach?: string;
+    boxPassCode?: string;
+  } | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
+
+  const handleCancelBooking = async (classId: string) => {
+    if (window.confirm('¿Confirmas que deseas cancelar esta reserva?')) {
+      const res = await cancelReservation(classId);
+      showToast(res.message);
+    }
+  };
+
+  // Date threshold for future vs past (using Oct 25, 2024 as in the mockups)
+  const todayDateStr = '2024-10-25';
+  const futureBookings = bookings
+    .filter(
+      (b) => b.classDate >= todayDateStr && (b.status === 'confirmed' || b.status === 'waitlist')
+    )
+    .sort((a, b) => a.classDate.localeCompare(b.classDate));
+
+  const pastBookings = bookings
+    .filter((b) => b.classDate < todayDateStr && b.status !== 'cancelled')
+    .sort((a, b) => b.classDate.localeCompare(a.classDate));
 
   // Toggles
   const [classReminders, setClassReminders] = useState(currentMember.classReminders);
@@ -182,6 +224,214 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenAuth }) => {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Toast Notification */}
+        {toastMsg && (
+          <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#1e2024] border border-[#c3f400] text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 max-w-xs text-xs font-inter animate-bounce">
+            <span className="material-symbols-outlined text-[#c3f400] text-[18px]">verified</span>
+            <span>{toastMsg}</span>
+          </div>
+        )}
+
+        {/* SECCIÓN MIS RESERVAS (FUTURAS Y PASADAS) */}
+        <section className="bg-[#1e2024] border border-[#444933]/30 rounded-xl p-4 shadow-lg space-y-3">
+          <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div className="flex items-center space-x-2">
+              <span className="material-symbols-outlined text-[#c3f400] text-[22px]">
+                event_available
+              </span>
+              <h3 className="font-condensed text-[18px] uppercase tracking-wider text-white font-bold">
+                Mis Reservas
+              </h3>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] font-condensed uppercase px-2 py-0.5 rounded bg-[#0c0e12] border border-[#c3f400]/30 text-[#c3f400] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c3f400] animate-pulse"></span>
+              <span>{futureBookings.length} Activas</span>
+            </div>
+          </div>
+
+          {/* Segmented Filter: Futuras vs Pasadas */}
+          <div className="grid grid-cols-2 p-1 rounded-lg bg-[#0c0e12] border border-[#444933]/40 font-condensed text-[13px] uppercase">
+            <button
+              onClick={() => setBookingTab('futuras')}
+              className={`py-1.5 rounded text-center transition-all cursor-pointer font-bold ${
+                bookingTab === 'futuras'
+                  ? 'bg-[#c3f400] text-[#111317] shadow-sm'
+                  : 'text-[#c4c9ac] hover:text-white'
+              }`}
+            >
+              Próximas ({futureBookings.length})
+            </button>
+            <button
+              onClick={() => setBookingTab('pasadas')}
+              className={`py-1.5 rounded text-center transition-all cursor-pointer font-bold ${
+                bookingTab === 'pasadas'
+                  ? 'bg-[#c3f400] text-[#111317] shadow-sm'
+                  : 'text-[#c4c9ac] hover:text-white'
+              }`}
+            >
+              Historial Pasadas ({pastBookings.length})
+            </button>
+          </div>
+
+          {/* Tab 1: Futuras / Activas */}
+          {bookingTab === 'futuras' && (
+            <div className="space-y-3 pt-1">
+              {futureBookings.length === 0 ? (
+                <div className="p-5 rounded-lg bg-[#0c0e12] border border-white/5 text-center space-y-2">
+                  <span className="material-symbols-outlined text-3xl text-[#c4c9ac]">
+                    event_busy
+                  </span>
+                  <p className="font-inter text-xs text-[#c4c9ac]">
+                    No tienes reservas programadas próximamente.
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('clases')}
+                    className="mt-1 px-4 py-1.5 rounded-lg bg-[#c3f400] text-[#111317] font-condensed font-bold uppercase text-xs cursor-pointer hover:brightness-110 active:scale-95 transition-all"
+                  >
+                    Ver Horarios y Reservar
+                  </button>
+                </div>
+              ) : (
+                futureBookings.map((b) => {
+                  const gymClass = classes.find((c) => c.id === b.classId);
+                  const isWaitlist = b.status === 'waitlist';
+
+                  return (
+                    <div
+                      key={b.id}
+                      className={`p-3.5 rounded-xl border transition-all ${
+                        isWaitlist
+                          ? 'bg-[#1a1c20] border-[#fb5b1b]/40'
+                          : 'bg-[#1a1c20] border-[#c3f400]/60 shadow-sm'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-condensed text-[12px] uppercase text-[#c3f400] font-bold">
+                              {b.classDate} • {b.classTime}
+                            </span>
+                          </div>
+                          <h4 className="font-condensed text-[20px] font-extrabold uppercase text-white tracking-wide">
+                            {b.classTitle}
+                          </h4>
+                        </div>
+
+                        {/* Status Badge */}
+                        <span
+                          className={`font-condensed text-[11px] uppercase font-bold px-2 py-0.5 rounded tracking-wider ${
+                            isWaitlist
+                              ? 'bg-[#fb5b1b]/20 text-[#fb5b1b] border border-[#fb5b1b]/30'
+                              : 'bg-[#c3f400] text-[#111317]'
+                          }`}
+                        >
+                          {isWaitlist ? 'EN ESPERA' : 'CONFIRMADA'}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 flex items-center justify-between text-xs text-[#c4c9ac] border-t border-white/5 pt-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[15px] text-[#c3f400]">
+                            sports_gymnastics
+                          </span>
+                          <span>{gymClass?.coachName || 'Coach Asignado'}</span>
+                        </div>
+                        <div className="flex items-center gap-1 font-condensed text-[#c3f400] font-bold uppercase">
+                          <span className="material-symbols-outlined text-[14px]">qr_code_2</span>
+                          <span>PASS: {b.boxPassCode}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="mt-3 pt-1 grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => handleCancelBooking(b.classId)}
+                          className="py-2 rounded-lg border border-[#ffb4ab]/40 text-[#ffb4ab] hover:bg-[#93000a]/20 font-condensed font-bold text-[14px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">close</span>
+                          <span>Cancelar</span>
+                        </button>
+                        <button
+                          onClick={() =>
+                            setSelectedBookingForQr({
+                              classTitle: b.classTitle,
+                              classTime: b.classTime,
+                              location: gymClass?.location || 'Box Principal',
+                              coach: gymClass?.coachName || 'Coach Asignado',
+                              boxPassCode: b.boxPassCode,
+                            })
+                          }
+                          className="py-2 rounded-lg bg-[#333539] text-white hover:bg-[#37393e] font-condensed font-bold text-[14px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">qr_code_scanner</span>
+                          <span>Ver Pase QR</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* Tab 2: Pasadas / Historial */}
+          {bookingTab === 'pasadas' && (
+            <div className="space-y-3 pt-1">
+              {pastBookings.length === 0 ? (
+                <div className="p-5 rounded-lg bg-[#0c0e12] border border-white/5 text-center">
+                  <p className="font-inter text-xs text-[#c4c9ac]">
+                    Aún no tienes historial de clases pasadas registradas.
+                  </p>
+                </div>
+              ) : (
+                pastBookings.map((b) => {
+                  const gymClass = classes.find((c) => c.id === b.classId);
+                  return (
+                    <div
+                      key={b.id}
+                      className="p-3 rounded-xl bg-[#0c0e12] border border-white/5 flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-condensed text-[12px] uppercase text-[#c4c9ac]">
+                            {b.classDate} • {b.classTime}
+                          </span>
+                          <span className="font-condensed text-[10px] uppercase bg-[#00dbe9]/10 text-[#00dbe9] border border-[#00dbe9]/30 px-1.5 py-0.2 rounded font-bold flex items-center gap-0.5">
+                            <span className="material-symbols-outlined text-[12px]">done_all</span>
+                            ASISTENCIA REGISTRADA
+                          </span>
+                        </div>
+                        <h4 className="font-condensed text-[17px] font-bold uppercase text-white">
+                          {b.classTitle}
+                        </h4>
+                        <p className="text-[11px] text-[#8e9379] font-inter mt-0.5">
+                          {gymClass?.coachName || 'Coach Asignado'} • {gymClass?.location || 'Box Central'}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          setSelectedBookingForQr({
+                            classTitle: b.classTitle,
+                            classTime: b.classTime,
+                            location: gymClass?.location || 'Box Central',
+                            coach: gymClass?.coachName || 'Coach Asignado',
+                            boxPassCode: b.boxPassCode,
+                          })
+                        }
+                        className="p-2 rounded-lg bg-[#282a2e] hover:bg-[#333539] text-[#c3f400] transition-colors cursor-pointer"
+                        title="Ver detalle del pase"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">badge</span>
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </section>
 
         {/* Métricas Clave de Rendimiento */}
@@ -591,9 +841,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenAuth }) => {
         </div>
       </main>
 
-      {/* QR Modal */}
+      {/* QR Modal for General Access */}
       {showQrModal && (
         <QrPassModal isOpen={showQrModal} onClose={() => setShowQrModal(false)} />
+      )}
+
+      {/* QR Modal for specific Class Booking */}
+      {selectedBookingForQr && (
+        <QrPassModal
+          isOpen={!!selectedBookingForQr}
+          onClose={() => setSelectedBookingForQr(null)}
+          bookingInfo={selectedBookingForQr}
+        />
       )}
 
       {/* Edit Profile Modal */}
